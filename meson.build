@@ -17,14 +17,10 @@ cc = meson.get_compiler('c')
 dep_math = cxx.find_library('m')
 
 mavgen =  find_program('modules/mavlink/pymavlink/tools/mavgen.py')
-mavgen_wrapper = find_program('tools/mavgen.sh')
-
 gen_mavlink_headers = custom_target('gen_mavlink_headers',
                                     input : ['modules/mavlink/message_definitions/v1.0/ardupilotmega.xml'],
-                                    output : ['mavlink_headers.done'],
-                                    command : [mavgen_wrapper, mavgen, '@INPUT@', '@OUTPUT@'])
-mavlink_includes = include_directories('mavlink', 'mavlink/ardupilotmega')
-
+                                    output : ['mavlink'],
+                                    command : [mavgen, '--lang', 'C', '--wire-protocol', '2.0', '-o', '@OUTPUT@', '@INPUT@'])
 
 exe_mavlink_router = executable(
         'mavlink-routerd',
@@ -42,6 +38,6 @@ exe_mavlink_router = executable(
          'util.c',
          'xtermios.cpp'],
         gen_mavlink_headers,
-        include_directories: mavlink_includes, 
+        include_directories: include_directories('mavlink', 'mavlink/ardupilotmega'),
         install: true,
 )
